@@ -56,7 +56,7 @@ const AdminLayout = () => {
             dispatch(updateUser(result.user));
             toast.success("Profile photo updated!");
         } catch (err) {
-            toast.error(getApiError(err).message || "Upload failed. Try again.");
+            toast.error(err.message || getApiError(err).message || "Upload failed. Try again.");
         } finally {
             setUploading(false);
         }
