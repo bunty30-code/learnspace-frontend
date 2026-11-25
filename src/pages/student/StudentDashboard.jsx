@@ -10,7 +10,7 @@ import {
 } from "recharts";
 
 import Avatar from "../../components/common/Avatar";
-import { SkeletonStatCards, SkeletonCardGrid } from "../../components/common/Skeleton";
+import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { PageHeader, StatCard, AlertBanner, EmptyState } from "../../components/common";
 import { ButtonLink } from "../../components/ui/Button";
 import { ProgressBar } from "../../components/ui/Progress";
@@ -33,13 +33,11 @@ const StudentDashboard = () => {
     const { user } = useSelector((state) => state.auth);
     const {
         enrollments,
-        loading: enrollmentsLoading,
         loaded: enrollmentsLoaded,
         error: enrollmentsError,
     } = useSelector((state) => state.studentEnrollments);
     const {
         notifications,
-        loading: notificationsLoading,
         loaded: notificationsLoaded,
         error: notificationsError,
     } = useSelector((state) => state.studentNotifications);
@@ -55,13 +53,7 @@ const StudentDashboard = () => {
     const completedCourses = enrollments.filter((e) => e.completed).length;
     const unreadNotifications = notifications.filter((n) => !n.is_read).length;
     const stats = { enrolled: enrollments.length, completed: completedCourses, unread: unreadNotifications };
-    const loadingStats =
-        (enrollmentsLoading && !enrollmentsLoaded) ||
-        (notificationsLoading && !notificationsLoaded);
     const error = enrollmentsError || notificationsError;
-    const statsFailed =
-        (enrollmentsError && !enrollmentsLoaded) ||
-        (notificationsError && !notificationsLoaded);
 
     const chartData = enrollments.slice(0, 6).map((enrollment) => ({
         name: (enrollment.course?.title || "Course").slice(0, 12),
@@ -104,21 +96,32 @@ const StudentDashboard = () => {
             {error && <AlertBanner type="error" message={error} />}
 
             {/* Stats */}
-            {loadingStats && !statsFailed ? (
-                <SkeletonStatCards count={3} className="sm:grid-cols-3" />
-            ) : !statsFailed && enrollmentsLoaded && notificationsLoaded && (
-                <section className="grid gap-4 sm:grid-cols-3">
-                    {statsConfig.map((stat) => (
+            <section className="grid gap-4 sm:grid-cols-3">
+                {statsConfig.map((stat) => {
+                    const isNotificationStat = stat.key === "unread";
+                    const loaded = isNotificationStat ? notificationsLoaded : enrollmentsLoaded;
+                    const failed = isNotificationStat
+                        ? Boolean(notificationsError && !notificationsLoaded)
+                        : Boolean(enrollmentsError && !enrollmentsLoaded);
+
+                    return (
                         <StatCard
                             key={stat.key}
                             icon={stat.icon}
                             label={stat.label}
-                            value={stats[stat.key]}
+                            value={
+                                loaded ? stats[stat.key] : failed ? "—" : (
+                                    <span
+                                        aria-hidden="true"
+                                        className="skeleton inline-block h-7 w-12 rounded"
+                                    />
+                                )
+                            }
                             tone={stat.tone}
                         />
-                    ))}
-                </section>
-            )}
+                    );
+                })}
+            </section>
 
             {/* My Courses */}
             <section className="mt-14">

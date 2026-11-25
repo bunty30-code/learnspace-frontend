@@ -11,10 +11,7 @@ import {
 } from "lucide-react";
 
 import { fetchAdminAnalytics } from "../../features/admin/adminAnalyticsSlice";
-import { fetchAdminStudents } from "../../features/admin/adminStudentSlice";
-import { fetchAdminCourses } from "../../features/admin/adminCourseSlice";
-import { fetchAdminProjects } from "../../features/admin/adminProjectSlice";
-import { fetchAdminSubmissions } from "../../features/admin/adminSubmissionSlice";
+import { fetchAdminOverview } from "../../features/admin/adminOverviewSlice";
 import { formatDate } from "../../utils/date";
 import {
     Skeleton,
@@ -83,10 +80,14 @@ const AdminDashboard = () => {
     const dispatch = useDispatch();
 
     const { user } = useSelector((state) => state.auth);
-    const studentsState = useSelector((state) => state.adminStudents);
-    const coursesState = useSelector((state) => state.adminCourses);
-    const projectsState = useSelector((state) => state.adminProjects);
-    const submissionsState = useSelector((state) => state.adminSubmissions);
+    const {
+        stats,
+        recentStudents,
+        recentSubmissions,
+        loaded: overviewLoaded,
+        loading: overviewLoading,
+        error: overviewError,
+    } = useSelector((state) => state.adminOverview);
 
     const {
         growth,
@@ -96,33 +97,7 @@ const AdminDashboard = () => {
     } = useSelector(
         (state) => state.adminAnalytics
     );
-    const stats = {
-        totalStudents: studentsState.meta?.total ?? studentsState.students.length,
-        totalCourses: coursesState.meta?.total ?? coursesState.courses.length,
-        publishedCourses: coursesState.courses.filter((course) => course.status === "published").length,
-        totalProjects: projectsState.meta?.total ?? projectsState.projects.length,
-        pendingSubmissions: submissionsState.submissions.filter(
-            (submission) => submission.status === "pending" || submission.status === "under_review"
-        ).length,
-    };
-    const recentStudents = studentsState.students.slice(0, 5);
-    const recentSubmissions = submissionsState.submissions.slice(0, 5);
-    const loading =
-        studentsState.loading ||
-        coursesState.loading ||
-        projectsState.loading ||
-        submissionsState.loading;
-    const hasDashboardData =
-        studentsState.loaded &&
-        coursesState.loaded &&
-        projectsState.loaded &&
-        submissionsState.loaded;
-    const error =
-        studentsState.error ||
-        coursesState.error ||
-        projectsState.error ||
-        submissionsState.error ||
-        analyticsError;
+    const error = overviewError || analyticsError;
 
     // Backend July se current month tak bhejta hai, isliye range bhi wahi dikhao
     const rangeLabel = growth.length
@@ -130,10 +105,7 @@ const AdminDashboard = () => {
         : "";
 
     useEffect(() => {
-        dispatch(fetchAdminStudents());
-        dispatch(fetchAdminCourses());
-        dispatch(fetchAdminProjects());
-        dispatch(fetchAdminSubmissions());
+        dispatch(fetchAdminOverview());
         dispatch(fetchAdminAnalytics(6));
     }, [dispatch]);
 
@@ -148,9 +120,9 @@ const AdminDashboard = () => {
             {error && <AlertBanner type="error" message={error} />}
 
             {/* Stat cards */}
-            {loading && !hasDashboardData ? (
+            {overviewLoading && !overviewLoaded ? (
                 <SkeletonStatCards count={5} className="sm:grid-cols-2 lg:grid-cols-3" />
-            ) : hasDashboardData ? (
+            ) : overviewLoaded ? (
                 <div className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {statCards.map((card) => (
                         <StatCard
@@ -158,7 +130,7 @@ const AdminDashboard = () => {
                             to={card.to}
                             icon={card.icon}
                             label={card.label}
-                            value={stats[card.key] ?? 0}
+                            value={stats?.[card.key] ?? 0}
                             tone={card.tone}
                         />
                     ))}
@@ -183,12 +155,12 @@ const AdminDashboard = () => {
                     </p>
 
                     <div className="relative mt-5 h-72">
-                        {analyticsLoading && growth.length === 0 ? (
+                        {analyticsError && growth.length === 0 ? (
+                            <ChartPlaceholder message="Unable to load analytics." />
+                        ) : analyticsLoading && growth.length === 0 ? (
                             <ChartSkeleton bars={6} />
                         ) : !analyticsLoaded ? (
                             <ChartSkeleton bars={6} />
-                        ) : analyticsError && growth.length === 0 ? (
-                            <ChartPlaceholder message="Unable to load analytics." />
                         ) : growth.length === 0 ? (
                             <ChartPlaceholder message="No activity in this period." />
                         ) : (
@@ -216,7 +188,7 @@ const AdminDashboard = () => {
                         </ButtonLink>
                     </div>
 
-                    {studentsState.loading && !studentsState.loaded ? (
+                    {overviewLoading && !overviewLoaded ? (
                         <div className="space-y-4">
                             {[1, 2, 3].map((row) => (
                                 <div key={row} className="flex items-center gap-3">
@@ -228,7 +200,7 @@ const AdminDashboard = () => {
                                 </div>
                             ))}
                         </div>
-                    ) : !studentsState.loaded ? null : recentStudents.length === 0 ? (
+                    ) : !overviewLoaded ? null : recentStudents.length === 0 ? (
                         <EmptyState
                             icon={Users}
                             title="No students registered yet."
@@ -286,7 +258,7 @@ const AdminDashboard = () => {
                         </ButtonLink>
                     </div>
 
-                    {submissionsState.loading && !submissionsState.loaded ? (
+                    {overviewLoading && !overviewLoaded ? (
                         <div className="space-y-4">
                             {[1, 2, 3].map((row) => (
                                 <div key={row} className="flex items-center gap-3">
@@ -298,7 +270,7 @@ const AdminDashboard = () => {
                                 </div>
                             ))}
                         </div>
-                    ) : !submissionsState.loaded ? null : recentSubmissions.length === 0 ? (
+                    ) : !overviewLoaded ? null : recentSubmissions.length === 0 ? (
                         <EmptyState
                             icon={Inbox}
                             title="No submissions received yet."

@@ -1,12 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import { getApiError } from "../../utils/api";
-import {
-    getStudents,
-    getCourses,
-    getProjects,
-    getSubmissions,
-} from "../../api/adminApi";
+import { getDashboardOverview } from "../../api/adminApi";
+import { addCourse, editCourse, removeCourse } from "./adminCourseSlice";
+import { addProject, removeProject } from "./adminProjectSlice";
+import { submitReview } from "./adminSubmissionSlice";
 
 /*
 |--------------------------------------------------------------------------
@@ -19,47 +17,18 @@ export const fetchAdminOverview = createAsyncThunk(
 
     async (_, { rejectWithValue }) => {
         try {
-            const [
-                studentsRes,
-                coursesRes,
-                projectsRes,
-                submissionsRes,
-            ] = await Promise.all([
-                getStudents(),
-                getCourses(),
-                getProjects(),
-                getSubmissions(),
-            ]);
-
-            const students = studentsRes.data.students;
-            const courses = coursesRes.data.courses;
-            const projects = projectsRes.data.projects;
-            const submissions = submissionsRes.data.submissions;
-
-            return {
-                stats: {
-                    totalStudents: studentsRes.data.meta?.total ?? students.length,
-                    totalCourses: coursesRes.data.meta?.total ?? courses.length,
-                    publishedCourses: courses.filter(
-                        (course) => course.status === "published"
-                    ).length,
-
-                    totalProjects:
-                        projectsRes.data.meta?.total ?? projects.length,
-                    pendingSubmissions: submissions.filter(
-                        (submission) =>
-                            submission.status === "pending" ||
-                            submission.status === "under_review"
-                    ).length,
-                },
-
-                recentStudents: students.slice(0, 5),
-                recentSubmissions: submissions.slice(0, 5),
-            };
+            const response = await getDashboardOverview();
+            return response.data;
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().adminOverview;
+            return !loading && !loaded;
+        },
+    },
 );
 
 /*
@@ -76,6 +45,7 @@ const adminOverviewSlice = createSlice({
         recentStudents: [],
         recentSubmissions: [],
 
+        loaded: false,
         loading: false,
         error: null,
     },
@@ -99,11 +69,32 @@ const adminOverviewSlice = createSlice({
                 state.stats = action.payload.stats;
                 state.recentStudents = action.payload.recentStudents;
                 state.recentSubmissions = action.payload.recentSubmissions;
+                state.loaded = true;
             })
 
             .addCase(fetchAdminOverview.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || null;
+            });
+
+        builder
+            .addCase(addCourse.fulfilled, (state) => {
+                state.loaded = false;
+            })
+            .addCase(editCourse.fulfilled, (state) => {
+                state.loaded = false;
+            })
+            .addCase(removeCourse.fulfilled, (state) => {
+                state.loaded = false;
+            })
+            .addCase(addProject.fulfilled, (state) => {
+                state.loaded = false;
+            })
+            .addCase(removeProject.fulfilled, (state) => {
+                state.loaded = false;
+            })
+            .addCase(submitReview.fulfilled, (state) => {
+                state.loaded = false;
             });
     },
 });

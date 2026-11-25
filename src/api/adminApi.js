@@ -25,6 +25,10 @@ export const getStudents = () => {
     return api.get("/admin/students");
 };
 
+export const getDashboardOverview = () => {
+    return api.get("/admin/dashboard");
+};
+
 /*
 |--------------------------------------------------------------------------
 | ANALYTICS

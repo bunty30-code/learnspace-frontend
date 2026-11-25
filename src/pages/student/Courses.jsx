@@ -12,7 +12,7 @@ import Badge from "../../components/ui/Badge";
 
 const Courses = () => {
     const dispatch = useDispatch();
-    const { courses, loaded, error } = useSelector((state) => state.studentCourses);
+    const { courses, loaded, loading, error } = useSelector((state) => state.studentCourses);
     const { enrollments, enrolling, error: enrollmentError } = useSelector((state) => state.studentEnrollments);
 
     useEffect(() => {
@@ -34,9 +34,9 @@ const Courses = () => {
             {error && <AlertBanner type="error" message={error} />}
             {enrollmentError && <AlertBanner type="error" message={enrollmentError} />}
 
-            {!loaded ? (
+            {loading || (!loaded && !error) ? (
                 <SkeletonCardGrid count={6} className="sm:grid-cols-2 lg:grid-cols-3" />
-            ) : error ? null : courses.length === 0 ? (
+            ) : error && !loaded ? null : courses.length === 0 ? (
                 <EmptyState icon={BookOpen} title="No courses available yet." />
             ) : (
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
