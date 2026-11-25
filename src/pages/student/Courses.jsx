@@ -26,7 +26,7 @@ const Courses = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="course catalogue"
+                eyebrow="Course List"
                 title="Browse Courses"
                 subtitle="Explore courses and start learning."
             />

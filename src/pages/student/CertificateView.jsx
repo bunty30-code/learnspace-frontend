@@ -109,7 +109,7 @@ const CertificateView = () => {
             </Button>
 
             <PageHeader
-                eyebrow="earned credential"
+                eyebrow="Certificate Details"
                 title={certificate.course?.title || "Certificate"}
                 action={
                     <Button type="button" onClick={handleDownload} loading={downloading} loadingText="Download PDF">

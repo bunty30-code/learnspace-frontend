@@ -67,7 +67,7 @@ const StudentDashboard = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="learning workspace"
+                eyebrow="Overview"
                 title={`Welcome back, ${(user?.name || "Student").split(" ")[0]}`}
                 subtitle="Continue your learning journey."
                 action={
@@ -85,7 +85,7 @@ const StudentDashboard = () => {
                     />
 
                     <div className="min-w-0">
-                        <span className="technical-label">Learner profile</span>
+                        <span className="technical-label">Profile Summary</span>
                         <p className="mt-1.5 truncate font-display text-sm font-semibold text-fg">
                             {user?.name || "Student"}
                         </p>

@@ -330,7 +330,7 @@ const Courses = () => {
     if (loading) {
         return (
             <div>
-                <PageHeader eyebrow="course registry" title="Courses" />
+                <PageHeader eyebrow="Course List" title="Courses" />
                 <SkeletonList count={4} />
             </div>
         );
@@ -413,7 +413,7 @@ const Courses = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="course registry"
+                eyebrow="Course List"
                 title="Courses"
                 subtitle={`Manage all courses (${courses.length}).`}
                 action={

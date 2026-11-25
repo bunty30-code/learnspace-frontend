@@ -112,7 +112,7 @@ const AdminDashboard = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="control room"
+                eyebrow="Admin Dashboard"
                 title={`Welcome back, ${(user?.name || "Admin").split(" ")[0]}!`}
                 subtitle="An overview of your platform — students, courses and reviews."
             />

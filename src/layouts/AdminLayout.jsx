@@ -65,7 +65,7 @@ const AdminLayout = () => {
     return (
         <DashboardShell
             navItems={navItems}
-            headerLabel="Control room"
+            headerLabel="Admin Panel"
             homePath="/admin"
             user={user}
             avatarSrc={user?.profile_image}

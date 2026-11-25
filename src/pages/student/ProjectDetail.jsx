@@ -112,7 +112,7 @@ const ProjectDetail = () => {
             </Button>
 
             <PageHeader
-                eyebrow="project brief"
+                eyebrow="Project Details"
                 title={project.title}
                 subtitle={`Course: ${project.course?.title || "-"}`}
             />

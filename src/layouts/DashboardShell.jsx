@@ -103,7 +103,7 @@ const DashboardShell = ({
                 </div>
 
                 <div className="flex items-center justify-between gap-2 px-5 pb-1 pt-5">
-                    <span className="technical-label">Workspace</span>
+                    <span className="technical-label">Menu</span>
                     <span className="badge badge-accent">{roleLabel}</span>
                 </div>
 

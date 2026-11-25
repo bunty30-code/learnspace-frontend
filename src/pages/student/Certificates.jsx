@@ -82,7 +82,7 @@ const Certificates = () => {
     if (loading && certificates.length === 0) {
         return (
             <div>
-                <PageHeader eyebrow="earned credentials" title="My Certificates" />
+                <PageHeader eyebrow="Earned Certificates" title="My Certificates" />
 
                 <div className="space-y-4">
                     {Array.from({ length: 3 }, (_, i) => (
@@ -110,7 +110,7 @@ const Certificates = () => {
     if (error) {
         return (
             <>
-                <PageHeader eyebrow="earned credentials" title="My Certificates" />
+                <PageHeader eyebrow="Earned Certificates" title="My Certificates" />
 
                 <AlertBanner type="error" message={error} />
             </>
@@ -120,7 +120,7 @@ const Certificates = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="earned credentials"
+                eyebrow="Earned Certificates"
                 title="My Certificates"
                 subtitle={`Total ${certificates.length} certificate(s) earned.`}
             />

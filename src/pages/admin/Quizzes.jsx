@@ -277,7 +277,7 @@ const Quizzes = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="assessment bank"
+                eyebrow="Quiz List"
                 title="Quizzes"
                 subtitle={`Manage final quizzes (${quizzes.length}).`}
                 action={
@@ -313,7 +313,7 @@ const Quizzes = () => {
             )}
 
             <div className="mb-5">
-                <SectionMarker index={1}>Quiz bank</SectionMarker>
+                <SectionMarker index={1}>Quiz List</SectionMarker>
             </div>
 
             {loading && quizzes.length === 0 ? (

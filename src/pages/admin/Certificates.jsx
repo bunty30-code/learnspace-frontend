@@ -100,7 +100,7 @@ const AdminCertificates = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="credential registry"
+                eyebrow="Issued Certificates"
                 title="Certificates"
                 subtitle="Issue and manage course completion certificates."
                 action={

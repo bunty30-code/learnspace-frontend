@@ -170,7 +170,7 @@ const QuizPage = () => {
     return (
         <div className="mx-auto max-w-3xl">
             <PageHeader
-                eyebrow="final quiz"
+                eyebrow="Quiz"
                 title={quiz.title}
                 subtitle={`Passing percentage: ${Number(quiz.passing_percentage)}%`}
                 action={<StatusLabel>{quiz.questions.length} questions</StatusLabel>}

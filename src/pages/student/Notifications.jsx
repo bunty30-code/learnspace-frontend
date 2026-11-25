@@ -27,7 +27,7 @@ const Notifications = () => {
     if (loading) {
         return (
             <div>
-                <PageHeader eyebrow="activity feed" title="Notifications" />
+                <PageHeader eyebrow="Updates" title="Notifications" />
 
                 <SkeletonList count={5} />
             </div>
@@ -37,7 +37,7 @@ const Notifications = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="activity feed"
+                eyebrow="Updates"
                 title="Notifications"
                 subtitle={`Total ${notifications.length} notification(s).`}
                 action={

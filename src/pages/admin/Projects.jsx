@@ -258,7 +258,7 @@ const Projects = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="project register"
+                eyebrow="Project List"
                 title="Projects"
                 subtitle={`Manage all projects (${projects.length}).`}
                 action={
@@ -295,7 +295,7 @@ const Projects = () => {
             )}
 
             <div className="mb-5">
-                <SectionMarker index={1}>Project register</SectionMarker>
+                <SectionMarker index={1}>Project List</SectionMarker>
             </div>
 
             {/* Project list */}

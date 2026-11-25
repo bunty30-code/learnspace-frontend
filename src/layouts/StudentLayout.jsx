@@ -49,7 +49,7 @@ const StudentLayout = () => {
     return (
         <DashboardShell
             navItems={navItems}
-            headerLabel="Learning workspace"
+            headerLabel="Student Panel"
             homePath="/student"
             user={user}
             avatarSrc={profile?.profile_image}

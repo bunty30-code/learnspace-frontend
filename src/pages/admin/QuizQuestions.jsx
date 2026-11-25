@@ -136,7 +136,7 @@ const QuizQuestions = () => {
             </ButtonLink>
 
             <PageHeader
-                eyebrow="assessment bank"
+                eyebrow="Quiz Questions"
                 title={`Questions — ${quiz?.title || "..."}`}
                 subtitle={`Total questions: ${questions.length} · Pass ${quiz?.passing_percentage ?? "-"}%`}
             />
@@ -277,7 +277,7 @@ const QuizQuestions = () => {
             </div>
 
             <div className="mb-5 mt-8">
-                <SectionMarker index={1}>Question bank</SectionMarker>
+                <SectionMarker index={1}>Question List</SectionMarker>
             </div>
 
             {loading && questions.length === 0 ? (

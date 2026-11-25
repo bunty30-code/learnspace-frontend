@@ -271,14 +271,14 @@ const Submissions = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="review desk"
+                eyebrow="Student Submissions"
                 title="Submissions"
                 subtitle={`Review student project submissions (${submissions.length} total).`}
             />
 
             {/* Filter tabs */}
             <div className="mb-6">
-                <SectionMarker index={1}>Review queue</SectionMarker>
+                <SectionMarker index={1}>Submitted Projects</SectionMarker>
 
                 <div className="mt-4 flex flex-wrap gap-2">
                     {filterTabs.map((tab) => (

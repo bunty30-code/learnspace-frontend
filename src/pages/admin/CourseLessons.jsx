@@ -242,7 +242,7 @@ const CourseLessons = () => {
             </ButtonLink>
 
             <PageHeader
-                eyebrow="lesson sequence"
+                eyebrow="Course Lessons"
                 title={`Lessons — ${currentCourse?.title || "..."}`}
                 subtitle={`Manage the lessons of this course in order (${lessons.length}).`}
                 action={

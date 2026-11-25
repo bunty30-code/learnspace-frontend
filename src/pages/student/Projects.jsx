@@ -23,7 +23,7 @@ const Projects = () => {
         return (
             <div>
                 <PageHeader
-                    eyebrow="project board"
+                    eyebrow="Your Projects"
                     title="Projects"
                     subtitle="Projects unlock when you complete a course and pass its final quiz."
                 />
@@ -36,7 +36,7 @@ const Projects = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="project board"
+                eyebrow="Your Projects"
                 title="Projects"
                 subtitle="Projects unlock when you complete a course and pass its final quiz."
             />

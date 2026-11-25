@@ -157,7 +157,7 @@ const Students = () => {
     if (loading) {
         return (
             <div>
-                <PageHeader eyebrow="cohort register" title="Students" />
+                <PageHeader eyebrow="Student List" title="Students" />
                 <SkeletonTableRows count={5} />
             </div>
         );
@@ -166,7 +166,7 @@ const Students = () => {
     if (error) {
         return (
             <>
-                <PageHeader eyebrow="cohort register" title="Students" />
+                <PageHeader eyebrow="Student List" title="Students" />
                 <AlertBanner type="error" message={error} />
             </>
         );
@@ -175,7 +175,7 @@ const Students = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="cohort register"
+                eyebrow="Student List"
                 title="Students"
                 subtitle="Click any student to see course-wise progress and what is still pending."
             />
@@ -235,7 +235,7 @@ const Students = () => {
                             <span className="technical-label hidden md:block">
                                 Activity
                             </span>
-                            <span className="technical-label">Avg Progress</span>
+                            <span className="technical-label">Average Progress</span>
                         </span>
                     </div>
 

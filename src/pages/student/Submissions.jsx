@@ -33,7 +33,7 @@ const Submissions = () => {
     if (loading) {
         return (
             <div>
-                <PageHeader eyebrow="submission log" title="My Submissions" />
+                <PageHeader eyebrow="Submission History" title="My Submissions" />
 
                 <SkeletonList count={4} />
             </div>
@@ -43,7 +43,7 @@ const Submissions = () => {
     return (
         <div>
             <PageHeader
-                eyebrow="submission log"
+                eyebrow="Submission History"
                 title="My Submissions"
                 subtitle={`Total ${submissions.length} submission(s).`}
             />
