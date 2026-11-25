@@ -3,7 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { fetchQuiz, submitQuizAnswers, clearCurrentQuiz, clearQuizError } from "../../features/student/quizSlice";
-import { fetchEnrollments } from "../../features/student/enrollmentSlice";
+import {
+    fetchEnrollments,
+    invalidateEnrollments,
+} from "../../features/student/enrollmentSlice";
+import { invalidateNotifications } from "../../features/student/notificationSlice";
 import { Skeleton, SkeletonLine } from "../../components/common/Skeleton";
 import { PageHeader, AlertBanner } from "../../components/common";
 import Button from "../../components/ui/Button";
@@ -97,7 +101,14 @@ const QuizPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await dispatch(submitQuizAnswers({ id: quiz.id, answers }));
+        const submission = await dispatch(submitQuizAnswers({ id: quiz.id, answers }));
+
+        if (submitQuizAnswers.fulfilled.match(submission)) {
+            dispatch(invalidateEnrollments());
+            if (submission.payload.passed) {
+                dispatch(invalidateNotifications());
+            }
+        }
     };
 
     if (result) {

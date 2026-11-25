@@ -29,7 +29,13 @@ export const fetchAdminProjects = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().adminProjects;
+            return !loading && !loaded;
+        },
+    },
 );
 
 export const addProject = createAsyncThunk(
@@ -92,6 +98,7 @@ const adminProjectSlice = createSlice({
     initialState: {
         projects: [],
         meta: null,
+        loaded: false,
 
         loading: false,
         saving: false,
@@ -120,6 +127,7 @@ const adminProjectSlice = createSlice({
                 state.loading = false;
                 state.projects = action.payload.projects;
                 state.meta = action.payload.meta;
+                state.loaded = true;
             })
 
             .addCase(fetchAdminProjects.rejected, (state, action) => {

@@ -24,7 +24,13 @@ export const fetchAdminStudents = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().adminStudents;
+            return !loading && !loaded;
+        },
+    },
 );
 
 /*
@@ -40,6 +46,7 @@ const adminStudentSlice = createSlice({
         students: [],
         summary: null,
         meta: null,
+        loaded: false,
 
         loading: false,
         error: null,
@@ -64,6 +71,7 @@ const adminStudentSlice = createSlice({
                 state.students = action.payload.students;
                 state.summary = action.payload.summary;
                 state.meta = action.payload.meta;
+                state.loaded = true;
             })
 
             .addCase(fetchAdminStudents.rejected, (state, action) => {

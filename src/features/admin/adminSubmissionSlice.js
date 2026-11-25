@@ -24,7 +24,13 @@ export const fetchAdminSubmissions = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().adminSubmissions;
+            return !loading && !loaded;
+        },
+    },
 );
 
 export const submitReview = createAsyncThunk(
@@ -56,6 +62,7 @@ const adminSubmissionSlice = createSlice({
     initialState: {
         submissions: [],
         meta: null,
+        loaded: false,
 
         loading: false,
         saving: false,
@@ -82,6 +89,7 @@ const adminSubmissionSlice = createSlice({
                 state.loading = false;
                 state.submissions = action.payload.submissions;
                 state.meta = action.payload.meta;
+                state.loaded = true;
             })
 
             .addCase(fetchAdminSubmissions.rejected, (state, action) => {

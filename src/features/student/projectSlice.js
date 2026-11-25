@@ -26,7 +26,13 @@ export const fetchProjects = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().studentProjects;
+            return !loading && !loaded;
+        },
+    },
 );
 
 export const fetchProjectDetail = createAsyncThunk(
@@ -42,7 +48,13 @@ export const fetchProjectDetail = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (id, { getState }) => {
+            const { loading, currentProject } = getState().studentProjects;
+            return !loading && String(currentProject?.id) !== String(id);
+        },
+    },
 );
 
 /*
@@ -57,6 +69,7 @@ const projectSlice = createSlice({
     initialState: {
         projects: [],
         meta: null,
+        loaded: false,
 
         currentProject: null,
 
@@ -87,6 +100,7 @@ const projectSlice = createSlice({
 
                 state.projects = action.payload.projects;
                 state.meta = action.payload.meta;
+                state.loaded = true;
             })
 
             .addCase(fetchProjects.rejected, (state, action) => {

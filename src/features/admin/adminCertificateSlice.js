@@ -22,7 +22,13 @@ export const fetchAdminCertificates = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().adminCertificates;
+            return !loading && !loaded;
+        },
+    },
 );
 
 export const issueCertificate = createAsyncThunk(
@@ -65,6 +71,7 @@ const adminCertificateSlice = createSlice({
     initialState: {
         certificates: [],
         meta: null,
+        loaded: false,
 
         loading: false,
         saving: false,
@@ -92,6 +99,7 @@ const adminCertificateSlice = createSlice({
                 state.loading = false;
                 state.certificates = action.payload.certificates;
                 state.meta = action.payload.meta;
+                state.loaded = true;
             })
 
             .addCase(fetchAdminCertificates.rejected, (state, action) => {

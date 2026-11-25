@@ -41,7 +41,7 @@ const PublicLayout = () => (
             </div>
         </header>
 
-        <main className="flex-1">
+        <main className="min-w-0 flex-1">
             <Outlet />
         </main>
 

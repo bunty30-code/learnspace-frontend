@@ -14,9 +14,8 @@ import {
 } from "lucide-react";
 
 import { logoutUser, updateUser } from "../features/auth/authSlice";
-import { updateAdminProfile } from "../api/adminApi";
 import { getApiError } from "../utils/api";
-import { uploadImage } from "../utils/upload";
+import { saveProfileImage } from "../utils/upload";
 import DashboardShell from "./DashboardShell";
 
 const navItems = [
@@ -53,9 +52,8 @@ const AdminLayout = () => {
         setUploading(true);
 
         try {
-            const url = await uploadImage(file);
-            const response = await updateAdminProfile({ profile_image: url });
-            dispatch(updateUser(response.data.user));
+            const result = await saveProfileImage(file);
+            dispatch(updateUser(result.user));
             toast.success("Profile photo updated!");
         } catch (err) {
             toast.error(getApiError(err).message || "Upload failed. Try again.");

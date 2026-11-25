@@ -28,7 +28,13 @@ export const fetchCourseLessons = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (courseId, { getState }) => {
+            const { courseLessonsLoading, loadedCourseId } = getState().studentLessons;
+            return !courseLessonsLoading && loadedCourseId !== courseId;
+        },
+    },
 );
 
 export const fetchLesson = createAsyncThunk(
@@ -44,7 +50,13 @@ export const fetchLesson = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (id, { getState }) => {
+            const { lessonLoading, currentLesson } = getState().studentLessons;
+            return !lessonLoading && String(currentLesson?.id) !== String(id);
+        },
+    },
 );
 
 export const completeLesson = createAsyncThunk(
@@ -80,6 +92,9 @@ const initialState = {
     lastCompleted: null,
 
     loading: false,
+    courseLessonsLoading: false,
+    lessonLoading: false,
+    loadedCourseId: null,
 
     completing: false,
 
@@ -106,35 +121,42 @@ const lessonSlice = createSlice({
         builder
 
             .addCase(fetchCourseLessons.pending, (state) => {
+                state.courseLessonsLoading = true;
                 state.loading = true;
                 state.error = null;
             })
 
             .addCase(fetchCourseLessons.fulfilled, (state, action) => {
-                state.loading = false;
+                state.courseLessonsLoading = false;
+                state.loading = state.lessonLoading;
 
                 state.lessons = action.payload.lessons;
                 state.meta = action.payload.meta;
+                state.loadedCourseId = action.meta.arg;
             })
 
             .addCase(fetchCourseLessons.rejected, (state, action) => {
-                state.loading = false;
+                state.courseLessonsLoading = false;
+                state.loading = state.lessonLoading;
                 state.error = action.payload?.message || null;
             })
 
             .addCase(fetchLesson.pending, (state) => {
+                state.lessonLoading = true;
                 state.loading = true;
                 state.error = null;
                 state.currentLesson = null;
             })
 
             .addCase(fetchLesson.fulfilled, (state, action) => {
-                state.loading = false;
+                state.lessonLoading = false;
+                state.loading = state.courseLessonsLoading;
                 state.currentLesson = action.payload.lesson;
             })
 
             .addCase(fetchLesson.rejected, (state, action) => {
-                state.loading = false;
+                state.lessonLoading = false;
+                state.loading = state.courseLessonsLoading;
                 state.error = action.payload?.message || null;
             })
 
@@ -150,6 +172,7 @@ const lessonSlice = createSlice({
                     message: action.payload.message,
                     enrollment: action.payload.enrollment,
                 };
+                state.loadedCourseId = null;
 
                 toast.success(action.payload.message || "Lesson marked as complete");
             })

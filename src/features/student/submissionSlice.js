@@ -27,7 +27,13 @@ export const fetchSubmissions = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().studentSubmissions;
+            return !loading && !loaded;
+        },
+    },
 );
 
 export const submitProject = createAsyncThunk(
@@ -53,6 +59,7 @@ export const submitProject = createAsyncThunk(
 const initialState = {
     submissions: [],
     meta: null,
+    loaded: false,
 
     loading: false,
 
@@ -88,6 +95,7 @@ const submissionSlice = createSlice({
 
                 state.submissions = action.payload.submissions;
                 state.meta = action.payload.meta;
+                state.loaded = true;
             })
 
             .addCase(fetchSubmissions.rejected, (state, action) => {

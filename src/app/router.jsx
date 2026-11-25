@@ -56,7 +56,7 @@ const AdminCertificates = lazy(() => import("../pages/admin/Certificates"));
 // Route switch hone pe dikhta hai — page content ki jagah
 const RouteFallback = () => (
     <div
-        className="flex min-h-[60vh] items-center justify-center"
+        className="flex min-h-[8rem] items-center justify-center"
         role="status"
         aria-live="polite"
         aria-busy="true"

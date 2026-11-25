@@ -9,6 +9,7 @@ import {
     saveProfilePhoto,
     clearProfileError,
 } from "../../features/student/profileSlice";
+import { updateUser } from "../../features/auth/authSlice";
 import Avatar from "../../components/common/Avatar";
 import { PageHeader, AlertBanner } from "../../components/common";
 import { Skeleton, SkeletonLine } from "../../components/common/Skeleton";
@@ -45,7 +46,9 @@ function ProfileForm({ profile, saving, uploadingPhoto, validationErrors, onSave
         setThumbError(null);
         const result = await dispatch(saveProfilePhoto(file));
 
-        if (saveProfilePhoto.rejected.match(result)) {
+        if (saveProfilePhoto.fulfilled.match(result)) {
+            dispatch(updateUser(result.payload.user));
+        } else {
             setThumbError(result.payload?.message || "Upload failed. Try again.");
         }
     };
@@ -218,12 +221,12 @@ function AccountPanel({ profile }) {
 
 const Profile = () => {
     const dispatch = useDispatch();
-    const { profile, loading, saving, uploadingPhoto, validationErrors } = useSelector((state) => state.studentProfile);
+    const { profile, saving, uploadingPhoto, validationErrors, error } = useSelector((state) => state.studentProfile);
     const [mode, setMode] = useState("view");
 
     useEffect(() => { dispatch(fetchProfile()); return () => { dispatch(clearProfileError()); }; }, [dispatch]);
 
-    if (loading && !profile) {
+    if (!profile && !error) {
         return (
             <div className="mx-auto max-w-6xl">
                 <PageHeader
@@ -263,7 +266,14 @@ const Profile = () => {
         );
     }
 
-    if (!profile) return <AlertBanner type="error" message="Failed to load profile." />;
+    if (!profile) {
+        return (
+            <div className="mx-auto max-w-6xl">
+                <PageHeader eyebrow="account" title="My Profile" />
+                <AlertBanner type="error" message={error || "Failed to load profile."} />
+            </div>
+        );
+    }
 
     const handleSave = async (data) => { const result = await dispatch(saveProfile(data)); if (saveProfile.fulfilled.match(result)) setMode("view"); };
 

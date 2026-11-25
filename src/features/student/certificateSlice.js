@@ -20,7 +20,13 @@ export const fetchCertificates = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().studentCertificates;
+            return !loading && !loaded;
+        },
+    },
 );
 
 export const fetchCertificateDetail = createAsyncThunk(
@@ -36,7 +42,13 @@ export const fetchCertificateDetail = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (id, { getState }) => {
+            const { loading, currentCertificate } = getState().studentCertificates;
+            return !loading && String(currentCertificate?.id) !== String(id);
+        },
+    },
 );
 
 const certificateSlice = createSlice({
@@ -45,6 +57,7 @@ const certificateSlice = createSlice({
     initialState: {
         certificates: [],
         meta: null,
+        loaded: false,
         currentCertificate: null,
 
         loading: false,
@@ -72,6 +85,7 @@ const certificateSlice = createSlice({
                 state.loading = false;
                 state.certificates = action.payload.certificates;
                 state.meta = action.payload.meta;
+                state.loaded = true;
             })
 
             .addCase(fetchCertificates.rejected, (state, action) => {

@@ -22,7 +22,13 @@ export const fetchAdminAnalytics = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().adminAnalytics;
+            return !loading && !loaded;
+        },
+    },
 );
 
 /*
@@ -36,6 +42,7 @@ const adminAnalyticsSlice = createSlice({
 
     initialState: {
         growth: [],
+        loaded: false,
 
         loading: false,
         error: null,
@@ -58,6 +65,7 @@ const adminAnalyticsSlice = createSlice({
             .addCase(fetchAdminAnalytics.fulfilled, (state, action) => {
                 state.loading = false;
                 state.growth = action.payload.growth;
+                state.loaded = true;
             })
 
             .addCase(fetchAdminAnalytics.rejected, (state, action) => {

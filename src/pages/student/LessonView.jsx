@@ -5,7 +5,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { PlayCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { fetchCourseLessons, fetchLesson, completeLesson, clearCurrentLesson, clearLessonError } from "../../features/student/lessonSlice";
-import { refreshEnrollmentProgress, fetchEnrollments } from "../../features/student/enrollmentSlice";
+import { updateEnrollment } from "../../features/student/enrollmentSlice";
+import { invalidateNotifications } from "../../features/student/notificationSlice";
 import { fetchCourseDetail } from "../../features/student/courseSlice";
 import { Skeleton, SkeletonLine } from "../../components/common/Skeleton";
 import { PageHeader, AlertBanner } from "../../components/common";
@@ -181,9 +182,10 @@ const LessonView = () => {
     const handleComplete = async () => {
         const result = await dispatch(completeLesson(lesson.id));
         if (completeLesson.fulfilled.match(result)) {
-            const enrollmentId = result.payload.enrollment?.id;
-            if (enrollmentId) dispatch(refreshEnrollmentProgress(enrollmentId));
-            dispatch(fetchEnrollments());
+            if (result.payload.enrollment) {
+                dispatch(updateEnrollment(result.payload.enrollment));
+            }
+            dispatch(invalidateNotifications());
         }
     };
 

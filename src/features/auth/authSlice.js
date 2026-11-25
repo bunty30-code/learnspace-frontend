@@ -39,6 +39,8 @@ const initialState = {
     isAuthenticated: false,
 
     loading: true,
+    initialized: false,
+    verificationStarted: false,
     error: null,
 
     validationErrors: null,
@@ -103,7 +105,13 @@ export const fetchMe = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { initialized, verificationStarted } = getState().auth;
+            return !initialized && !verificationStarted;
+        },
+    },
 );
 
 /*
@@ -288,12 +296,14 @@ const authSlice = createSlice({
             */
 
             .addCase(fetchMe.pending, (state) => {
+                state.verificationStarted = true;
                 state.loading = true;
                 state.error = null;
             })
 
             .addCase(fetchMe.fulfilled, (state, action) => {
                 state.loading = false;
+                state.initialized = true;
 
                 state.user = action.payload.user;
                 state.role = action.payload.user?.role || null;
@@ -305,6 +315,7 @@ const authSlice = createSlice({
 
             .addCase(fetchMe.rejected, (state, action) => {
                 state.loading = false;
+                state.initialized = true;
 
                 state.user = null;
                 state.role = null;

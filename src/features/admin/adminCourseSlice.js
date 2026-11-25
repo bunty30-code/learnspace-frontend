@@ -30,7 +30,13 @@ export const fetchAdminCourses = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().adminCourses;
+            return !loading && !loaded;
+        },
+    },
 );
 
 export const fetchAdminCourseDetail = createAsyncThunk(
@@ -46,7 +52,13 @@ export const fetchAdminCourseDetail = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (id, { getState }) => {
+            const { loading, currentCourse } = getState().adminCourses;
+            return !loading && String(currentCourse?.id) !== String(id);
+        },
+    },
 );
 
 export const addCourse = createAsyncThunk(
@@ -112,6 +124,7 @@ const adminCourseSlice = createSlice({
     initialState: {
         courses: [],
         meta: null,
+        loaded: false,
 
         currentCourse: null,
 
@@ -150,6 +163,7 @@ const adminCourseSlice = createSlice({
                 state.loading = false;
                 state.courses = action.payload.courses;
                 state.meta = action.payload.meta;
+                state.loaded = true;
             })
 
             .addCase(fetchAdminCourses.rejected, (state, action) => {

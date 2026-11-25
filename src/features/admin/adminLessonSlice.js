@@ -29,7 +29,13 @@ export const fetchAdminLessons = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (courseId, { getState }) => {
+            const { loading, loadedCourseId } = getState().adminLessons;
+            return !loading && loadedCourseId !== courseId;
+        },
+    },
 );
 
 export const addLesson = createAsyncThunk(
@@ -92,6 +98,7 @@ const adminLessonSlice = createSlice({
     initialState: {
         lessons: [],
         meta: null,
+        loadedCourseId: null,
 
         loading: false,
         saving: false,
@@ -120,6 +127,7 @@ const adminLessonSlice = createSlice({
                 state.loading = false;
                 state.lessons = action.payload.lessons;
                 state.meta = action.payload.meta;
+                state.loadedCourseId = action.meta.arg;
             })
 
             .addCase(fetchAdminLessons.rejected, (state, action) => {

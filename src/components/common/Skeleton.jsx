@@ -100,7 +100,7 @@ export const SkeletonTableRows = ({ count = 5 }) => (
 );
 
 export const FullScreenLoader = ({ message = "Loading" }) => (
-    <div className="relative flex min-h-screen flex-col items-center justify-center gap-5">
+    <div className="relative flex min-h-[100dvh] flex-col items-center justify-center gap-5">
         <div className="relative">
             <span
                 aria-hidden="true"

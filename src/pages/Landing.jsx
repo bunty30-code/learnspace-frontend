@@ -142,6 +142,18 @@ const whyUs = [
 ];
 
 const fallbackTicker = ["LearnSpace — Learn skills. Track progress."];
+let homeDataRequest;
+
+const getCachedHomeData = () => {
+    if (!homeDataRequest) {
+        homeDataRequest = getHomeData().catch((error) => {
+            homeDataRequest = null;
+            throw error;
+        });
+    }
+
+    return homeDataRequest;
+};
 
 const Ticker = ({ label, items }) => (
     <div className="ticker">
@@ -176,7 +188,7 @@ const Landing = () => {
         { icon: Layers, number: "0", label: "Lessons" },
         { icon: Award, number: "0", label: "Certificates" },
     ]);
-    const [tickerItems, setTickerItems] = useState(["Loading LearnSpace updates..."]);
+    const [tickerItems, setTickerItems] = useState(fallbackTicker);
 
     /* Platform readout — scroll pe reveal + count-up ka trigger.
        threshold 0.2 + neeche ka margin: panel tab trigger ho jab uska
@@ -187,7 +199,7 @@ const Landing = () => {
     useEffect(() => {
         let active = true;
 
-        getHomeData()
+        getCachedHomeData()
             .then((res) => {
                 if (!active) return;
 

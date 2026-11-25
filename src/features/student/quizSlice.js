@@ -23,7 +23,10 @@ export const fetchQuiz = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => !getState().studentQuiz.loading,
+    },
 );
 
 export const submitQuizAnswers = createAsyncThunk(

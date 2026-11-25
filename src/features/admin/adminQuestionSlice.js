@@ -29,7 +29,13 @@ export const fetchAdminQuestions = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (quizId, { getState }) => {
+            const { loading, loadedQuizId } = getState().adminQuestions;
+            return !loading && loadedQuizId !== quizId;
+        },
+    },
 );
 
 export const bulkAddQuestions = createAsyncThunk(
@@ -76,6 +82,7 @@ const adminQuestionSlice = createSlice({
         quiz: null,
         questions: [],
         meta: null,
+        loadedQuizId: null,
 
         loading: false,
         saving: false,
@@ -105,6 +112,7 @@ const adminQuestionSlice = createSlice({
                 state.quiz = action.payload.quiz;
                 state.questions = action.payload.questions;
                 state.meta = action.payload.meta;
+                state.loadedQuizId = action.meta.arg;
             })
 
             .addCase(fetchAdminQuestions.rejected, (state, action) => {

@@ -10,8 +10,11 @@ import {
     Inbox,
 } from "lucide-react";
 
-import { fetchAdminOverview } from "../../features/admin/adminOverviewSlice";
 import { fetchAdminAnalytics } from "../../features/admin/adminAnalyticsSlice";
+import { fetchAdminStudents } from "../../features/admin/adminStudentSlice";
+import { fetchAdminCourses } from "../../features/admin/adminCourseSlice";
+import { fetchAdminProjects } from "../../features/admin/adminProjectSlice";
+import { fetchAdminSubmissions } from "../../features/admin/adminSubmissionSlice";
 import { formatDate } from "../../utils/date";
 import {
     Skeleton,
@@ -80,12 +83,46 @@ const AdminDashboard = () => {
     const dispatch = useDispatch();
 
     const { user } = useSelector((state) => state.auth);
-    const { stats, recentStudents, recentSubmissions, loading, error } =
-        useSelector((state) => state.adminOverview);
+    const studentsState = useSelector((state) => state.adminStudents);
+    const coursesState = useSelector((state) => state.adminCourses);
+    const projectsState = useSelector((state) => state.adminProjects);
+    const submissionsState = useSelector((state) => state.adminSubmissions);
 
-    const { growth, loading: analyticsLoading } = useSelector(
+    const {
+        growth,
+        loaded: analyticsLoaded,
+        loading: analyticsLoading,
+        error: analyticsError,
+    } = useSelector(
         (state) => state.adminAnalytics
     );
+    const stats = {
+        totalStudents: studentsState.meta?.total ?? studentsState.students.length,
+        totalCourses: coursesState.meta?.total ?? coursesState.courses.length,
+        publishedCourses: coursesState.courses.filter((course) => course.status === "published").length,
+        totalProjects: projectsState.meta?.total ?? projectsState.projects.length,
+        pendingSubmissions: submissionsState.submissions.filter(
+            (submission) => submission.status === "pending" || submission.status === "under_review"
+        ).length,
+    };
+    const recentStudents = studentsState.students.slice(0, 5);
+    const recentSubmissions = submissionsState.submissions.slice(0, 5);
+    const loading =
+        studentsState.loading ||
+        coursesState.loading ||
+        projectsState.loading ||
+        submissionsState.loading;
+    const hasDashboardData =
+        studentsState.loaded &&
+        coursesState.loaded &&
+        projectsState.loaded &&
+        submissionsState.loaded;
+    const error =
+        studentsState.error ||
+        coursesState.error ||
+        projectsState.error ||
+        submissionsState.error ||
+        analyticsError;
 
     // Backend July se current month tak bhejta hai, isliye range bhi wahi dikhao
     const rangeLabel = growth.length
@@ -93,48 +130,12 @@ const AdminDashboard = () => {
         : "";
 
     useEffect(() => {
-        dispatch(fetchAdminOverview());
+        dispatch(fetchAdminStudents());
+        dispatch(fetchAdminCourses());
+        dispatch(fetchAdminProjects());
+        dispatch(fetchAdminSubmissions());
         dispatch(fetchAdminAnalytics(6));
     }, [dispatch]);
-
-    if (loading && !stats) {
-        return (
-            <div className="space-y-8">
-                <SkeletonStatCards
-                    count={4}
-                    className="gap-4 sm:grid-cols-2 lg:grid-cols-3"
-                />
-
-                <div className="grid gap-8 lg:grid-cols-2">
-                    {[1, 2].map((n) => (
-                        <section key={n} className="card p-6 sm:p-7">
-                            <SkeletonLine className="h-4 w-36" />
-
-                            <div className="mt-5 space-y-4">
-                                {[1, 2, 3].map((row) => (
-                                    <div
-                                        key={row}
-                                        className="flex items-center gap-3"
-                                    >
-                                        <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
-
-                                        <div className="min-w-0 flex-1">
-                                            <SkeletonLine className="h-3.5 w-32" />
-                                            <SkeletonLine className="mt-2 h-3 w-44" />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    ))}
-                </div>
-            </div>
-        );
-    }
-
-    if (error && !stats) {
-        return <AlertBanner type="error" message={error} />;
-    }
 
     return (
         <div>
@@ -144,19 +145,25 @@ const AdminDashboard = () => {
                 subtitle="An overview of your platform — students, courses and reviews."
             />
 
+            {error && <AlertBanner type="error" message={error} />}
+
             {/* Stat cards */}
-            <div className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {statCards.map((card) => (
-                    <StatCard
-                        key={card.key}
-                        to={card.to}
-                        icon={card.icon}
-                        label={card.label}
-                        value={stats?.[card.key] ?? 0}
-                        tone={card.tone}
-                    />
-                ))}
-            </div>
+            {loading && !hasDashboardData ? (
+                <SkeletonStatCards count={5} className="sm:grid-cols-2 lg:grid-cols-3" />
+            ) : hasDashboardData ? (
+                <div className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {statCards.map((card) => (
+                        <StatCard
+                            key={card.key}
+                            to={card.to}
+                            icon={card.icon}
+                            label={card.label}
+                            value={stats[card.key] ?? 0}
+                            tone={card.tone}
+                        />
+                    ))}
+                </div>
+            ) : null}
 
             {/* Growth trend — full width */}
             <section className="mt-12">
@@ -178,6 +185,10 @@ const AdminDashboard = () => {
                     <div className="relative mt-5 h-72">
                         {analyticsLoading && growth.length === 0 ? (
                             <ChartSkeleton bars={6} />
+                        ) : !analyticsLoaded ? (
+                            <ChartSkeleton bars={6} />
+                        ) : analyticsError && growth.length === 0 ? (
+                            <ChartPlaceholder message="Unable to load analytics." />
                         ) : growth.length === 0 ? (
                             <ChartPlaceholder message="No activity in this period." />
                         ) : (
@@ -205,7 +216,19 @@ const AdminDashboard = () => {
                         </ButtonLink>
                     </div>
 
-                    {recentStudents.length === 0 ? (
+                    {studentsState.loading && !studentsState.loaded ? (
+                        <div className="space-y-4">
+                            {[1, 2, 3].map((row) => (
+                                <div key={row} className="flex items-center gap-3">
+                                    <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+                                    <div className="min-w-0 flex-1">
+                                        <SkeletonLine className="h-3.5 w-32" />
+                                        <SkeletonLine className="mt-2 h-3 w-44" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : !studentsState.loaded ? null : recentStudents.length === 0 ? (
                         <EmptyState
                             icon={Users}
                             title="No students registered yet."
@@ -263,7 +286,19 @@ const AdminDashboard = () => {
                         </ButtonLink>
                     </div>
 
-                    {recentSubmissions.length === 0 ? (
+                    {submissionsState.loading && !submissionsState.loaded ? (
+                        <div className="space-y-4">
+                            {[1, 2, 3].map((row) => (
+                                <div key={row} className="flex items-center gap-3">
+                                    <div className="min-w-0 flex-1">
+                                        <SkeletonLine className="h-3.5 w-32" />
+                                        <SkeletonLine className="mt-2 h-3 w-44" />
+                                    </div>
+                                    <SkeletonLine className="h-6 w-20 shrink-0" />
+                                </div>
+                            ))}
+                        </div>
+                    ) : !submissionsState.loaded ? null : recentSubmissions.length === 0 ? (
                         <EmptyState
                             icon={Inbox}
                             title="No submissions received yet."

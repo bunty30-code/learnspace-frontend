@@ -257,8 +257,8 @@ const DashboardShell = ({
                     </div>
                 </header>
 
-                <main className="relative px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-                    <div className="mx-auto max-w-6xl">{children ?? <Outlet />}</div>
+                <main className="relative min-w-0 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+                    <div className="mx-auto min-w-0 max-w-6xl">{children ?? <Outlet />}</div>
                 </main>
             </div>
         </div>

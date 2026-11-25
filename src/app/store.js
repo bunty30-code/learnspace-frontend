@@ -1,5 +1,10 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
+import {
+  loginUser,
+  logoutUser,
+  registerUser,
+} from "../features/auth/authSlice";
 import authReducer from "../features/auth/authSlice";
 import studentReducer from "../features/student/studentSlice";
 import courseReducer from "../features/student/courseSlice";
@@ -23,8 +28,7 @@ import adminProjectReducer from "../features/admin/adminProjectSlice";
 import adminSubmissionReducer from "../features/admin/adminSubmissionSlice";
 import adminCertificateReducer from "../features/admin/adminCertificateSlice";
 
-export const store = configureStore({
-  reducer: {
+const appReducer = combineReducers({
     auth: authReducer,
 
     student: studentReducer,
@@ -48,5 +52,21 @@ export const store = configureStore({
     adminProjects: adminProjectReducer,
     adminSubmissions: adminSubmissionReducer,
     adminCertificates: adminCertificateReducer,
-  },
+});
+
+const rootReducer = (state, action) => {
+  if (
+    loginUser.fulfilled.match(action) ||
+    registerUser.fulfilled.match(action) ||
+    logoutUser.fulfilled.match(action) ||
+    logoutUser.rejected.match(action)
+  ) {
+    state = { auth: state?.auth };
+  }
+
+  return appReducer(state, action);
+};
+
+export const store = configureStore({
+  reducer: rootReducer,
 });

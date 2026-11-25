@@ -2,11 +2,8 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 
 import { getApiError } from "../../utils/api";
-import {
-    getStudentProfile,
-    updateStudentProfile,
-} from "../../api/studentApi";
-import { uploadImage } from "../../utils/upload";
+import { getStudentProfile, updateStudentProfile } from "../../api/studentApi";
+import { saveProfileImage } from "../../utils/upload";
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +24,13 @@ export const fetchProfile = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, profile } = getState().studentProfile;
+            return !loading && !profile;
+        },
+    },
 );
 
 export const saveProfile = createAsyncThunk(
@@ -50,20 +53,17 @@ export const saveProfile = createAsyncThunk(
 | upload hone ke baad bhi user ko "Save Changes" dabaana padta hai aur Cancel
 | karne par file orphan ho jaati hai.
 |
-| Upload aur save dono is thunk me hain taaki ek hi loading/error state dono
-| steps ko cover kare.
+| Upload aur profile update ek request me hote hain, aur wahi loading/error
+| state photo save ke poore operation ko cover karti hai.
 */
 export const saveProfilePhoto = createAsyncThunk(
     "studentProfile/updatePhoto",
 
     async (file, { rejectWithValue }) => {
         try {
-            const url = await uploadImage(file);
-            const response = await updateStudentProfile({ profile_image: url });
-
-            return response.data;
+            return await saveProfileImage(file);
         } catch (error) {
-            // `uploadImage` already friendly Error throw karta hai, wo axios
+            // `saveProfileImage` already friendly Error throw karta hai, wo axios
             // error nahi hai — uska message seedha use karo.
             return rejectWithValue(
                 error.response

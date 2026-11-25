@@ -23,7 +23,13 @@ export const fetchCourses = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().studentCourses;
+            return !loading && !loaded;
+        },
+    },
 );
 
 export const fetchCourseDetail = createAsyncThunk(
@@ -39,7 +45,13 @@ export const fetchCourseDetail = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (id, { getState }) => {
+            const { loading, currentCourse } = getState().studentCourses;
+            return !loading && String(currentCourse?.id) !== String(id);
+        },
+    },
 );
 
 /*
@@ -54,6 +66,7 @@ const courseSlice = createSlice({
     initialState: {
         courses: [],
         meta: null,
+        loaded: false,
 
         currentCourse: null,
 
@@ -84,6 +97,7 @@ const courseSlice = createSlice({
 
                 state.courses = action.payload.courses;
                 state.meta = action.payload.meta;
+                state.loaded = true;
             })
 
             .addCase(fetchCourses.rejected, (state, action) => {

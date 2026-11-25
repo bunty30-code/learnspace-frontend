@@ -28,7 +28,13 @@ export const fetchNotifications = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().studentNotifications;
+            return !loading && !loaded;
+        },
+    },
 );
 
 export const markNotificationRead = createAsyncThunk(
@@ -71,6 +77,7 @@ const notificationSlice = createSlice({
     initialState: {
         notifications: [],
         meta: null,
+        loaded: false,
 
         loading: false,
 
@@ -80,6 +87,9 @@ const notificationSlice = createSlice({
     reducers: {
         clearNotificationError: (state) => {
             state.error = null;
+        },
+        invalidateNotifications: (state) => {
+            state.loaded = false;
         },
     },
 
@@ -96,6 +106,7 @@ const notificationSlice = createSlice({
 
                 state.notifications = action.payload.notifications;
                 state.meta = action.payload.meta;
+                state.loaded = true;
             })
 
             .addCase(fetchNotifications.rejected, (state, action) => {
@@ -136,6 +147,9 @@ const notificationSlice = createSlice({
     },
 });
 
-export const { clearNotificationError } = notificationSlice.actions;
+export const {
+    clearNotificationError,
+    invalidateNotifications,
+} = notificationSlice.actions;
 
 export default notificationSlice.reducer;

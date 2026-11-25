@@ -28,7 +28,13 @@ export const fetchEnrollments = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(getApiError(error));
         }
-    }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { loading, loaded } = getState().studentEnrollments;
+            return !loading && !loaded;
+        },
+    },
 );
 
 export const startCourse = createAsyncThunk(
@@ -71,6 +77,7 @@ const enrollmentSlice = createSlice({
     initialState: {
         enrollments: [],
         meta: null,
+        loaded: false,
 
         enrolling: false,
 
@@ -84,6 +91,21 @@ const enrollmentSlice = createSlice({
         clearEnrollmentError: (state) => {
             state.error = null;
             state.validationErrors = null;
+        },
+        updateEnrollment: (state, action) => {
+            const index = state.enrollments.findIndex(
+                (enrollment) => enrollment.id === action.payload.id
+            );
+
+            if (index !== -1) {
+                state.enrollments[index] = {
+                    ...state.enrollments[index],
+                    ...action.payload,
+                };
+            }
+        },
+        invalidateEnrollments: (state) => {
+            state.loaded = false;
         },
     },
 
@@ -100,6 +122,7 @@ const enrollmentSlice = createSlice({
 
                 state.enrollments = action.payload.enrollments;
                 state.meta = action.payload.meta;
+                state.loaded = true;
             })
 
             .addCase(fetchEnrollments.rejected, (state, action) => {
@@ -154,6 +177,10 @@ const enrollmentSlice = createSlice({
     },
 });
 
-export const { clearEnrollmentError } = enrollmentSlice.actions;
+export const {
+    clearEnrollmentError,
+    updateEnrollment,
+    invalidateEnrollments,
+} = enrollmentSlice.actions;
 
 export default enrollmentSlice.reducer;

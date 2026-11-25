@@ -9,9 +9,8 @@ import {
     ResponsiveContainer, Cell,
 } from "recharts";
 
-import { fetchStudentDashboard } from "../../features/student/studentSlice";
 import Avatar from "../../components/common/Avatar";
-import { SkeletonLine, SkeletonStatCards, SkeletonCardGrid } from "../../components/common/Skeleton";
+import { SkeletonStatCards, SkeletonCardGrid } from "../../components/common/Skeleton";
 import { PageHeader, StatCard, AlertBanner, EmptyState } from "../../components/common";
 import { ButtonLink } from "../../components/ui/Button";
 import { ProgressBar } from "../../components/ui/Progress";
@@ -20,6 +19,8 @@ import { SectionMarker, CornerBrackets } from "../../components/ui/Deco";
 import { getChartTheme } from "../../components/charts/chartTheme";
 import { TooltipCard } from "../../components/charts/ChartTooltip";
 import { useTheme } from "../../theme/themeContext";
+import { fetchEnrollments } from "../../features/student/enrollmentSlice";
+import { fetchNotifications } from "../../features/student/notificationSlice";
 
 const statsConfig = [
     { key: "enrolled", label: "Enrolled Courses", icon: BookOpen, tone: "accent" },
@@ -30,39 +31,37 @@ const statsConfig = [
 const StudentDashboard = () => {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
-    const { profile } = useSelector((state) => state.studentProfile);
-    const { enrollments, notifications, loading, error } = useSelector((state) => state.student);
+    const {
+        enrollments,
+        loading: enrollmentsLoading,
+        loaded: enrollmentsLoaded,
+        error: enrollmentsError,
+    } = useSelector((state) => state.studentEnrollments);
+    const {
+        notifications,
+        loading: notificationsLoading,
+        loaded: notificationsLoaded,
+        error: notificationsError,
+    } = useSelector((state) => state.studentNotifications);
 
     const { mode } = useTheme();
     const theme = getChartTheme(mode);
 
     useEffect(() => {
-        dispatch(fetchStudentDashboard());
+        dispatch(fetchEnrollments());
+        dispatch(fetchNotifications());
     }, [dispatch]);
-
-    if (loading && enrollments.length === 0 && !profile) {
-        return (
-            <div>
-                <SkeletonLine className="mb-8 h-8 w-72" />
-
-                <SkeletonStatCards count={3} />
-
-                <section className="mt-14">
-                    <SkeletonLine className="mb-6 h-3 w-40" />
-
-                    <SkeletonCardGrid count={3} />
-                </section>
-            </div>
-        );
-    }
-
-    if (error) {
-        return <AlertBanner type="error" message={error} />;
-    }
 
     const completedCourses = enrollments.filter((e) => e.completed).length;
     const unreadNotifications = notifications.filter((n) => !n.is_read).length;
     const stats = { enrolled: enrollments.length, completed: completedCourses, unread: unreadNotifications };
+    const loadingStats =
+        (enrollmentsLoading && !enrollmentsLoaded) ||
+        (notificationsLoading && !notificationsLoaded);
+    const error = enrollmentsError || notificationsError;
+    const statsFailed =
+        (enrollmentsError && !enrollmentsLoaded) ||
+        (notificationsError && !notificationsLoaded);
 
     const chartData = enrollments.slice(0, 6).map((enrollment) => ({
         name: (enrollment.course?.title || "Course").slice(0, 12),
@@ -89,7 +88,7 @@ const StudentDashboard = () => {
                 <div className="mt-8 flex items-center gap-4">
                     <Avatar
                         name={user?.name}
-                        src={profile?.profile_image}
+                        src={user?.profile_image}
                         className="h-12 w-12 text-base"
                     />
 
@@ -102,18 +101,24 @@ const StudentDashboard = () => {
                 </div>
             </PageHeader>
 
+            {error && <AlertBanner type="error" message={error} />}
+
             {/* Stats */}
-            <section className="grid gap-4 sm:grid-cols-3">
-                {statsConfig.map((stat) => (
-                    <StatCard
-                        key={stat.key}
-                        icon={stat.icon}
-                        label={stat.label}
-                        value={stats[stat.key]}
-                        tone={stat.tone}
-                    />
-                ))}
-            </section>
+            {loadingStats && !statsFailed ? (
+                <SkeletonStatCards count={3} className="sm:grid-cols-3" />
+            ) : !statsFailed && enrollmentsLoaded && notificationsLoaded && (
+                <section className="grid gap-4 sm:grid-cols-3">
+                    {statsConfig.map((stat) => (
+                        <StatCard
+                            key={stat.key}
+                            icon={stat.icon}
+                            label={stat.label}
+                            value={stats[stat.key]}
+                            tone={stat.tone}
+                        />
+                    ))}
+                </section>
+            )}
 
             {/* My Courses */}
             <section className="mt-14">
@@ -128,7 +133,11 @@ const StudentDashboard = () => {
                     </Link>
                 </div>
 
-                {enrollments.length === 0 ? (
+                {enrollmentsError && !enrollmentsLoaded ? null : !enrollmentsLoaded ? (
+                    <div className="mt-6">
+                        <SkeletonCardGrid count={3} />
+                    </div>
+                ) : enrollments.length === 0 ? (
                     <div className="mt-6">
                         <EmptyState
                             icon={BookOpen}

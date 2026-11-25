@@ -77,16 +77,15 @@ const resizeImage = async (file, maxSize = 1024) => {
 };
 
 /*
-| Photo upload karo aur uska URL wapas do. Axios ka raw error.message user ko
-| "Request failed with status code 422" dikhata hai, isliye Laravel ke message
-| ko `getApiError` se nikalke aage badhao.
+| Profile photo upload aur profile update ek hi request me hote hain. Isse
+| URL-returning upload ke baad alag save request ka round trip nahi lagta.
 */
-export const uploadImage = async (file) => {
+export const saveProfileImage = async (file) => {
     const dataUrl = await resizeImage(file);
 
     try {
-        const response = await api.post("/auth/upload-image", { image: dataUrl });
-        return response.data.url;
+        const response = await api.post("/auth/profile-image", { image: dataUrl });
+        return response.data;
     } catch (error) {
         throw new Error(getApiError(error).message || "Upload failed. Please try again.", {
             cause: error,
